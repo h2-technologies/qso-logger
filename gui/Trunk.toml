@@ -1,6 +1,6 @@
 # gui/Trunk.toml
 [build]
-target = "./index.html"
+target = "./frontend/index.html"
 dist = "frontend/dist"
 
 [serve]
