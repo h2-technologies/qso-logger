@@ -1,24 +1,36 @@
 use yew::prelude::*;
+use yew_router::prelude::*;
 
-#[component]
-fn App() -> Html {
-    let counter = use_state(|| 0);
-    let onclick = {
-        let counter = counter.clone();
-        move |_| {
-            let value = *counter + 1;
-            counter.set(value);
-        }
-    };
+mod site;
 
+#[derive(Clone, Routable, PartialEq)]
+enum Route {
+    #[at("/")]
+    Home,
+    #[not_found]
+    #[at("/404")]
+    NotFound,
+}
+
+
+fn switch(routes: Route) -> Html {
+    match routes {
+        Route::Home => html! { <site::home::Home /> },
+        Route::NotFound => html! { <h1>{ "404" }</h1> },
+    }
+}
+
+#[function_component(Main)]
+fn app() -> Html {
     html! {
-        <div>
-            <button {onclick}>{ "+1" }</button>
-            <p>{ *counter }</p>
-        </div>
+    <>
+        <BrowserRouter>
+            <Switch<Route> render={switch} /> // <- must be child of <BrowserRouter>
+        </BrowserRouter>
+    </>
     }
 }
 
 fn main() {
-    yew::Renderer::<App>::new().render();
+    yew::Renderer::<Main>::new().render();
 }

@@ -64,7 +64,7 @@ dependencies = [
 name = "frontend"
 version = "0.1.0"
 dependencies = [
- "yew 0.22.0 (git+https://github.com/yewstack/yew/)",
+ "yew",
  "yew-router",
 ]
 
@@ -902,31 +902,6 @@ dependencies = [
 [[package]]
 name = "yew"
 version = "0.22.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3346273ed61b636f5d84e6c696d40f380045b5565b36c5c47f8fc634b8bf5be6"
-dependencies = [
- "console_error_panic_hook",
- "futures",
- "gloo",
- "implicit-clone",
- "indexmap",
- "js-sys",
- "rustversion",
- "serde",
- "slab",
- "thiserror 2.0.17",
- "tokio",
- "tokise",
- "tracing",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
- "yew-macro 0.22.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "yew"
-version = "0.22.0"
 source = "git+https://github.com/yewstack/yew/#2019f4577cbdcd389b34973fdec3164be3af941a"
 dependencies = [
  "console_error_panic_hook",
@@ -945,22 +920,7 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
- "yew-macro 0.22.0 (git+https://github.com/yewstack/yew/)",
-]
-
-[[package]]
-name = "yew-macro"
-version = "0.22.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "479e94d645dde3749e81d488c1d32987509dd3b8c31650fcf6e3af1f370e913b"
-dependencies = [
- "once_cell",
- "prettyplease",
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "rustversion",
- "syn 2.0.111",
+ "yew-macro",
 ]
 
 [[package]]
@@ -980,8 +940,7 @@ dependencies = [
 [[package]]
 name = "yew-router"
 version = "0.19.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "415cb628900ddf1eaf55ebd04163adf1ea80d3f5a9832a876554f9c0fdd4c282"
+source = "git+https://github.com/yewstack/yew/#2019f4577cbdcd389b34973fdec3164be3af941a"
 dependencies = [
  "gloo",
  "js-sys",
@@ -992,15 +951,14 @@ dependencies = [
  "urlencoding",
  "wasm-bindgen",
  "web-sys",
- "yew 0.22.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "yew",
  "yew-router-macro",
 ]
 
 [[package]]
 name = "yew-router-macro"
 version = "0.19.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e87a3ce33434ab66a700edbaf2cc8a417d9b89f00a6fd8216fd6ac83b0e7b1c"
+source = "git+https://github.com/yewstack/yew/#2019f4577cbdcd389b34973fdec3164be3af941a"
 dependencies = [
  "proc-macro2",
  "quote",
