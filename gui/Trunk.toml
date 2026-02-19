@@ -1,7 +1,0 @@
-# gui/Trunk.toml
-[build]
-target = "./frontend/index.html"
-dist = "frontend/dist"
-
-[serve]
-port = 8080
