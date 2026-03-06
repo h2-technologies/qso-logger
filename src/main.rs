@@ -27,6 +27,7 @@ use tokio_tungstenite::{
 
 const AMATEUR_PREFIX_SEGMENTS: [u16; 3] = [0x2602, 0xfa86, 0x0044];
 const PREFIX_LENGTH_BITS: u8 = 48;
+const TUNNEL_BUFFER_SIZE: usize = 16 * 1024;
 
 type AppResult<T> = Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
@@ -99,9 +100,10 @@ async fn main() -> AppResult<()> {
     let cli = Cli::parse();
 
     if cli.server == cli.client {
-        return Err(
-            std::io::Error::other("exactly one of --server or --client must be set").into(),
-        );
+        return Err(std::io::Error::other(
+            "either --server or --client must be specified, but not both",
+        )
+        .into());
     }
 
     let sample_unicast = amateur_global_unicast(1, 1);
@@ -249,7 +251,7 @@ async fn pipe_websocket_and_tcp(websocket: WebSocket, stream: TcpStream) -> AppR
     };
 
     let tcp_to_ws = async {
-        let mut buf = [0_u8; 16 * 1024];
+        let mut buf = [0_u8; TUNNEL_BUFFER_SIZE];
         loop {
             let read = tcp_read.read(&mut buf).await?;
             if read == 0 {
@@ -289,7 +291,7 @@ async fn pipe_tungstenite_and_tcp(
     };
 
     let tcp_to_ws = async {
-        let mut buf = [0_u8; 16 * 1024];
+        let mut buf = [0_u8; TUNNEL_BUFFER_SIZE];
         loop {
             let read = tcp_read.read(&mut buf).await?;
             if read == 0 {
