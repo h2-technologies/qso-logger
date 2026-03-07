@@ -1,4 +1,7 @@
 pub const IPV6_PREFIX: [u16; 3] = [0x2602, 0xfa86, 0x0044];
+/// Full 64-bit network prefix embedded in RFC 3306 unicast-prefix-based multicast addresses.
+/// Corresponds to `2602:fa86:44:44::/64` (plen = 0x40).
+pub const MULTICAST_NETWORK_PREFIX: [u16; 4] = [0x2602, 0xfa86, 0x0044, 0x0044];
 pub const MULTICAST_GROUP_ALL_STATIONS: u32 = 1;
 /// Reverse DNS zone covering the /48 amateur-radio IPv6 prefix
 /// (`2602:fa86:44::/48`).  PTR records for addresses within this prefix
@@ -85,17 +88,19 @@ pub fn generate_ipv6_address(callsign: &str, subnet: u16) -> std::net::Ipv6Addr 
 
 /// Generate a global-scope RFC 3306 unicast-prefix-based multicast address.
 ///
-/// The prefix `2602:fa86:44::/48` (plen=0x30) occupies segments 2–5.
-/// The full 32-bit `group_id` is spread across segments 6 (high 16 bits) and
-/// 7 (low 16 bits), giving 4 billion distinct multicast groups.
+/// Layout (16-bit segments):
+/// - seg[0]: `0xff3e` — multicast, flags P+T, global scope
+/// - seg[1]: `0x0040` — reserved byte + plen=64 (for a /64 network prefix)
+/// - seg[2..5]: `2602:fa86:44:44` — the 64-bit network prefix
+/// - seg[6..7]: `group_id` split across high and low 16-bit halves
 pub fn multicast_global(group_id: u32) -> std::net::Ipv6Addr {
     std::net::Ipv6Addr::new(
         0xff3e,
-        0x0030,
-        0x2602,
-        0xfa86,
-        0x0044,
-        0x0000,
+        0x0040,
+        MULTICAST_NETWORK_PREFIX[0],
+        MULTICAST_NETWORK_PREFIX[1],
+        MULTICAST_NETWORK_PREFIX[2],
+        MULTICAST_NETWORK_PREFIX[3],
         (group_id >> 16) as u16,
         group_id as u16,
     )
@@ -103,15 +108,15 @@ pub fn multicast_global(group_id: u32) -> std::net::Ipv6Addr {
 
 /// Generate a site-local-scope RFC 3306 unicast-prefix-based multicast address.
 ///
-/// See [`multicast_global`] for the group_id layout.
+/// See [`multicast_global`] for the segment layout; scope nibble is `5` (site-local).
 pub fn multicast_site_local(group_id: u32) -> std::net::Ipv6Addr {
     std::net::Ipv6Addr::new(
         0xff35,
-        0x0030,
-        0x2602,
-        0xfa86,
-        0x0044,
-        0x0000,
+        0x0040,
+        MULTICAST_NETWORK_PREFIX[0],
+        MULTICAST_NETWORK_PREFIX[1],
+        MULTICAST_NETWORK_PREFIX[2],
+        MULTICAST_NETWORK_PREFIX[3],
         (group_id >> 16) as u16,
         group_id as u16,
     )
@@ -119,15 +124,15 @@ pub fn multicast_site_local(group_id: u32) -> std::net::Ipv6Addr {
 
 /// Generate a link-local-scope RFC 3306 unicast-prefix-based multicast address.
 ///
-/// See [`multicast_global`] for the group_id layout.
+/// See [`multicast_global`] for the segment layout; scope nibble is `2` (link-local).
 pub fn multicast_link_local(group_id: u32) -> std::net::Ipv6Addr {
     std::net::Ipv6Addr::new(
         0xff32,
-        0x0030,
-        0x2602,
-        0xfa86,
-        0x0044,
-        0x0000,
+        0x0040,
+        MULTICAST_NETWORK_PREFIX[0],
+        MULTICAST_NETWORK_PREFIX[1],
+        MULTICAST_NETWORK_PREFIX[2],
+        MULTICAST_NETWORK_PREFIX[3],
         (group_id >> 16) as u16,
         group_id as u16,
     )
@@ -250,11 +255,11 @@ mod tests {
         let addr = multicast_global(MULTICAST_GROUP_ALL_STATIONS);
         let segs = addr.segments();
         assert_eq!(segs[0], 0xff3e);
-        assert_eq!(segs[1], 0x0030);
+        assert_eq!(segs[1], 0x0040);
         assert_eq!(segs[2], 0x2602);
         assert_eq!(segs[3], 0xfa86);
         assert_eq!(segs[4], 0x0044);
-        assert_eq!(segs[5], 0x0000);
+        assert_eq!(segs[5], 0x0044);
         assert_eq!(segs[6], (MULTICAST_GROUP_ALL_STATIONS >> 16) as u16);
         assert_eq!(segs[7], MULTICAST_GROUP_ALL_STATIONS as u16);
     }
@@ -266,7 +271,8 @@ mod tests {
         let addr = multicast_global(group_id);
         let segs = addr.segments();
         assert_eq!(segs[0], 0xff3e);
-        assert_eq!(segs[1], 0x0030);
+        assert_eq!(segs[1], 0x0040);
+        assert_eq!(segs[5], 0x0044);
         assert_eq!(segs[6], 0x0001);
         assert_eq!(segs[7], 0x0002);
     }
@@ -276,6 +282,8 @@ mod tests {
         let addr = multicast_site_local(MULTICAST_GROUP_ALL_STATIONS);
         let segs = addr.segments();
         assert_eq!(segs[0], 0xff35);
+        assert_eq!(segs[1], 0x0040);
+        assert_eq!(segs[5], 0x0044);
         assert_eq!(segs[6], (MULTICAST_GROUP_ALL_STATIONS >> 16) as u16);
         assert_eq!(segs[7], MULTICAST_GROUP_ALL_STATIONS as u16);
     }
@@ -285,6 +293,8 @@ mod tests {
         let addr = multicast_link_local(MULTICAST_GROUP_ALL_STATIONS);
         let segs = addr.segments();
         assert_eq!(segs[0], 0xff32);
+        assert_eq!(segs[1], 0x0040);
+        assert_eq!(segs[5], 0x0044);
         assert_eq!(segs[6], (MULTICAST_GROUP_ALL_STATIONS >> 16) as u16);
         assert_eq!(segs[7], MULTICAST_GROUP_ALL_STATIONS as u16);
     }
