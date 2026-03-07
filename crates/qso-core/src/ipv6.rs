@@ -1,7 +1,7 @@
 pub const IPV6_PREFIX: [u16; 3] = [0x2602, 0xfa86, 0x0044];
 pub const MULTICAST_GROUP_ALL_STATIONS: u32 = 1;
-/// Reverse DNS zone covering the /36 amateur-radio IPv6 prefix
-/// (`2602:fa86:44::/36`).  PTR records for addresses within this prefix
+/// Reverse DNS zone covering the /48 amateur-radio IPv6 prefix
+/// (`2602:fa86:44::/48`).  PTR records for addresses within this prefix
 /// are delegated under this zone.
 pub const REVERSE_ZONE: &str = "0.6.8.a.f.2.0.6.2.ip6.arpa";
 
@@ -84,6 +84,10 @@ pub fn generate_ipv6_address(callsign: &str, subnet: u16) -> std::net::Ipv6Addr 
 }
 
 /// Generate a global-scope RFC 3306 unicast-prefix-based multicast address.
+///
+/// The prefix `2602:fa86:44::/48` (plen=0x30) occupies segments 2–5.
+/// The full 32-bit `group_id` is spread across segments 6 (high 16 bits) and
+/// 7 (low 16 bits), giving 4 billion distinct multicast groups.
 pub fn multicast_global(group_id: u32) -> std::net::Ipv6Addr {
     std::net::Ipv6Addr::new(
         0xff3e,
@@ -92,12 +96,14 @@ pub fn multicast_global(group_id: u32) -> std::net::Ipv6Addr {
         0xfa86,
         0x0044,
         0x0000,
-        0x0000,
+        (group_id >> 16) as u16,
         group_id as u16,
     )
 }
 
 /// Generate a site-local-scope RFC 3306 unicast-prefix-based multicast address.
+///
+/// See [`multicast_global`] for the group_id layout.
 pub fn multicast_site_local(group_id: u32) -> std::net::Ipv6Addr {
     std::net::Ipv6Addr::new(
         0xff35,
@@ -106,12 +112,14 @@ pub fn multicast_site_local(group_id: u32) -> std::net::Ipv6Addr {
         0xfa86,
         0x0044,
         0x0000,
-        0x0000,
+        (group_id >> 16) as u16,
         group_id as u16,
     )
 }
 
 /// Generate a link-local-scope RFC 3306 unicast-prefix-based multicast address.
+///
+/// See [`multicast_global`] for the group_id layout.
 pub fn multicast_link_local(group_id: u32) -> std::net::Ipv6Addr {
     std::net::Ipv6Addr::new(
         0xff32,
@@ -120,7 +128,7 @@ pub fn multicast_link_local(group_id: u32) -> std::net::Ipv6Addr {
         0xfa86,
         0x0044,
         0x0000,
-        0x0000,
+        (group_id >> 16) as u16,
         group_id as u16,
     )
 }
@@ -247,8 +255,20 @@ mod tests {
         assert_eq!(segs[3], 0xfa86);
         assert_eq!(segs[4], 0x0044);
         assert_eq!(segs[5], 0x0000);
-        assert_eq!(segs[6], 0x0000);
+        assert_eq!(segs[6], (MULTICAST_GROUP_ALL_STATIONS >> 16) as u16);
         assert_eq!(segs[7], MULTICAST_GROUP_ALL_STATIONS as u16);
+    }
+
+    #[test]
+    fn test_multicast_global_large_group_id() {
+        // Verify that the high 16 bits of a >16-bit group_id are preserved.
+        let group_id: u32 = 0x0001_0002;
+        let addr = multicast_global(group_id);
+        let segs = addr.segments();
+        assert_eq!(segs[0], 0xff3e);
+        assert_eq!(segs[1], 0x0030);
+        assert_eq!(segs[6], 0x0001);
+        assert_eq!(segs[7], 0x0002);
     }
 
     #[test]
@@ -256,6 +276,7 @@ mod tests {
         let addr = multicast_site_local(MULTICAST_GROUP_ALL_STATIONS);
         let segs = addr.segments();
         assert_eq!(segs[0], 0xff35);
+        assert_eq!(segs[6], (MULTICAST_GROUP_ALL_STATIONS >> 16) as u16);
         assert_eq!(segs[7], MULTICAST_GROUP_ALL_STATIONS as u16);
     }
 
@@ -264,6 +285,7 @@ mod tests {
         let addr = multicast_link_local(MULTICAST_GROUP_ALL_STATIONS);
         let segs = addr.segments();
         assert_eq!(segs[0], 0xff32);
+        assert_eq!(segs[6], (MULTICAST_GROUP_ALL_STATIONS >> 16) as u16);
         assert_eq!(segs[7], MULTICAST_GROUP_ALL_STATIONS as u16);
     }
 
