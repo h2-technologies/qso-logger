@@ -1,0 +1,19 @@
+# QSO Logger Configuration File
+# Copy this file to config.toml and edit before running.
+
+[server]
+bind_address = "0.0.0.0"
+port = 8080
+qso_tcp_port = 7300
+domain = "qso.as40046.org"
+
+[client]
+callsign = "W1AW"
+server_url = "http://localhost:8080"
+subnet = 0
+
+[cloudflare]
+api_token = "YOUR_CLOUDFLARE_API_TOKEN"
+zone_id_forward = "YOUR_FORWARD_ZONE_ID"
+zone_id_reverse = "YOUR_REVERSE_ZONE_ID"
+ttl = 3600

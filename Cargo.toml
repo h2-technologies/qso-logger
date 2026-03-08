@@ -1,6 +1,24 @@
+[workspace]
+resolver = "2"
+members = [
+    ".",
+    "crates/qso-core",
+    "crates/qso-server",
+    "crates/qso-client",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+
 [package]
 name = "qso-logger"
-version = "0.1.0"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
 
 [dependencies]
+qso-core = { path = "crates/qso-core" }
+tokio = { version = "1", features = ["full"] }
+is-terminal = "0.4"
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
