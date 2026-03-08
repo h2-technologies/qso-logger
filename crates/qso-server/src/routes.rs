@@ -10,10 +10,11 @@ pub async fn status() -> Json<StatusResponse> {
     Json(StatusResponse {
         version: env!("CARGO_PKG_VERSION").to_string(),
         prefix: format!(
-            "{:04x}:{:04x}:{:04x}::/48",
+            "{:04x}:{:04x}:{:04x}:{:04x}::/64",
             ipv6::IPV6_PREFIX[0],
             ipv6::IPV6_PREFIX[1],
-            ipv6::IPV6_PREFIX[2]
+            ipv6::IPV6_PREFIX[2],
+            ipv6::GLOBAL_UNICAST_SUBNET
         ),
         multicast_global: ipv6::multicast_global(ipv6::MULTICAST_GROUP_ALL_STATIONS).to_string(),
         multicast_site_local: ipv6::multicast_site_local(ipv6::MULTICAST_GROUP_ALL_STATIONS)

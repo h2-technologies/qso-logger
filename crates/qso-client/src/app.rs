@@ -32,7 +32,7 @@ pub fn app() -> Html {
             if cs.is_empty() {
                 return;
             }
-            let addr = ipv6::generate_ipv6_address(&cs, 0);
+            let addr = ipv6::generate_ipv6_address(&cs, ipv6::GLOBAL_UNICAST_SUBNET);
             ipv6_address.set(addr.to_string());
         })
     };
@@ -57,7 +57,7 @@ pub fn app() -> Html {
             let body = serde_json::json!({
                 "callsign": cs,
                 "ipv6_address": addr,
-                "subnet": 0,
+                "subnet": ipv6::GLOBAL_UNICAST_SUBNET,
                 "tcp_port": 7300u16,
             });
 
