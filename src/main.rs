@@ -27,10 +27,11 @@ fn run_server() {
     );
 
     let prefix = format!(
-        "{:04x}:{:04x}:{:04x}::/48",
+        "{:04x}:{:04x}:{:04x}:{:04x}::/64",
         qso_core::ipv6::IPV6_PREFIX[0],
         qso_core::ipv6::IPV6_PREFIX[1],
         qso_core::ipv6::IPV6_PREFIX[2],
+        qso_core::ipv6::GLOBAL_UNICAST_SUBNET,
     );
     eprintln!("[qso-logger] IPv6 prefix: {}", prefix);
     eprintln!(

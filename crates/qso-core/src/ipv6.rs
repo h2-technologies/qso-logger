@@ -1,4 +1,7 @@
 pub const IPV6_PREFIX: [u16; 3] = [0x2602, 0xfa86, 0x0044];
+/// The subnet identifier for the global unicast /64 prefix (`2602:fa86:44:44::/64`).
+/// Used to generate station unicast addresses in the global addressing space.
+pub const GLOBAL_UNICAST_SUBNET: u16 = 0x0044;
 /// Full 64-bit network prefix embedded in RFC 3306 unicast-prefix-based multicast addresses.
 /// Corresponds to `2602:fa86:44:44::/64` (plen = 0x40).
 pub const MULTICAST_NETWORK_PREFIX: [u16; 4] = [0x2602, 0xfa86, 0x0044, 0x0044];
@@ -238,6 +241,16 @@ mod tests {
         assert_eq!(segs[1], 0xfa86);
         assert_eq!(segs[2], 0x0044);
         assert_eq!(segs[3], 0x0000);
+    }
+
+    #[test]
+    fn test_generate_ipv6_address_global_unicast_subnet() {
+        let addr = generate_ipv6_address("W1AW", GLOBAL_UNICAST_SUBNET);
+        let segs = addr.segments();
+        assert_eq!(segs[0], 0x2602);
+        assert_eq!(segs[1], 0xfa86);
+        assert_eq!(segs[2], 0x0044);
+        assert_eq!(segs[3], 0x0044);
     }
 
     #[test]
